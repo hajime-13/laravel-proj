@@ -48,14 +48,6 @@
                                 data-price="{{ $item->price }}"
                                 onclick="toggleItem(this)">
                                 <div class="qty-badge d-none" id="badge-{{ $item->id }}">1</div>
-                                @if($item->image)
-                                    <img src="{{ Storage::url($item->image) }}" alt="{{ $item->name }}"
-                                         style="width:100%;height:70px;object-fit:cover;border-radius:.4rem;margin-bottom:.4rem">
-                                @else
-                                    <div style="width:100%;height:70px;background:#f1f5f9;border-radius:.4rem;margin-bottom:.4rem;display:flex;align-items:center;justify-content:center">
-                                        <i class="bi bi-image text-muted fs-4"></i>
-                                    </div>
-                                @endif
                                 <div class="fw-medium small">{{ $item->name }}</div>
                                 <div class="text-success small">₱{{ number_format($item->price, 2) }}</div>
                             </div>
