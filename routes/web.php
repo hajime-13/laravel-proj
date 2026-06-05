@@ -10,7 +10,10 @@ use Illuminate\Support\Facades\Route;
 
 // Redirect root to login
 Route::get('/', fn () => redirect()->route('login'));
-
+Route::get('/clear-views', function () {
+    Artisan::call('view:clear');
+    return 'Views cleared!';
+})->middleware('auth');
 // Guest routes
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
