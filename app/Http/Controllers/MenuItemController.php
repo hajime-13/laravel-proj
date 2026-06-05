@@ -2,60 +2,112 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MenuItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
-class ProfileController extends Controller
+class MenuItemController extends Controller
 {
-    public function show()
+    public function index()
     {
-        $user = Auth::user();
-        return view('profile.show', compact('user'));
+        $menuItems = MenuItem::where('user_id', Auth::id())->latest()->paginate(10);
+        return view('menu.index', compact('menuItems'));
     }
 
-    public function edit()
+    public function store(Request $request)
     {
-        $user = Auth::user();
-        return view('profile.edit', compact('user'));
-    }
-
-    public function update(Request $request)
-    {
-        $user = Auth::user();
-
         $request->validate([
-            'name'    => 'required|string|max:255',
-            'email'   => 'required|email|unique:users,email,' . $user->id,
-            'address' => 'nullable|string|max:500',
-            'gender'  => 'nullable|in:Male,Female,Other',
-            'avatar'  => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
+            'name'        => 'required|string|max:255',
+            'category'    => 'required|string|max:100',
+            'price'       => 'required|numeric|min:0',
+            'description' => 'nullable|string|max:500',
+            'image'       => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
+            'available'   => 'nullable',
         ]);
 
-        $data = $request->only('name', 'email', 'address', 'gender');
+        $data = [
+            'user_id'     => Auth::id(),
+            'name'        => $request->name,
+            'category'    => $request->category,
+            'price'       => $request->price,
+            'description' => $request->description,
+            'available'   => $request->has('available'),
+        ];
 
-        if ($request->hasFile('avatar')) {
-            if ($user->avatar) {
-                Storage::disk('public')->delete($user->avatar);
-            }
-            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('menu', 'public');
         }
 
-        if ($request->filled('password')) {
-            $request->validate([
-                'password'         => 'min:8|confirmed',
-                'current_password' => 'required',
-            ]);
-            if (!Hash::check($request->current_password, $user->password)) {
-                return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        MenuItem::create($data);
+
+        return redirect()->route('menu.index')
+            ->with('toast_success', 'Menu item "' . $request->name . '" added successfully.');
+    }
+
+    public function edit(MenuItem $menu)
+    {
+        $this->authorizeMenuItem($menu);
+        return view('menu.edit', compact('menu'));
+    }
+
+    public function update(Request $request, MenuItem $menu)
+    {
+        $this->authorizeMenuItem($menu);
+
+        $request->validate([
+            'name'        => 'required|string|max:255',
+            'category'    => 'required|string|max:100',
+            'price'       => 'required|numeric|min:0',
+            'description' => 'nullable|string|max:500',
+            'image'       => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
+        ]);
+
+        $data = [
+            'name'        => $request->name,
+            'category'    => $request->category,
+            'price'       => $request->price,
+            'description' => $request->description,
+            'available'   => $request->has('available'),
+        ];
+
+        if ($request->hasFile('image')) {
+            if ($menu->image) {
+                Storage::disk('public')->delete($menu->image);
             }
-            $data['password'] = Hash::make($request->password);
+            $data['image'] = $request->file('image')->store('menu', 'public');
         }
 
-        $user->update($data);
+        if ($request->has('remove_image') && $menu->image) {
+            Storage::disk('public')->delete($menu->image);
+            $data['image'] = null;
+        }
 
-        return redirect()->route('profile.show')
-            ->with('toast_success', 'Profile updated successfully.');
+        $menu->update($data);
+
+        return redirect()->route('menu.index')
+            ->with('toast_success', 'Menu item "' . $menu->name . '" updated successfully.');
+    }
+
+    public function destroy(MenuItem $menu)
+    {
+        $this->authorizeMenuItem($menu);
+
+        if ($menu->image) {
+            Storage::disk('public')->delete($menu->image);
+        }
+
+        $name = $menu->name;
+        $menu->delete();
+
+        return redirect()->route('menu.index')
+            ->with('toast_danger', 'Menu item "' . $name . '" deleted.');
+    }
+
+    private function authorizeMenuItem(MenuItem $menu): void
+    {
+        if ($menu->user_id !== Auth::id()) {
+            abort(403);
+        }
     }
 }
