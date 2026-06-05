@@ -122,8 +122,7 @@
     const cart = {};
 
     // Pre-populate cart from existing order items
-    const existingItems = @json($order->orderItems->map(fn($oi) => ['id' => $oi->menu_item_id, 'name' => $oi->menuItem->name, 'price' => (float)$oi->unit_price, 'qty' => $oi->quantity]));
-    existingItems.forEach(item => {
+const existingItems = @json($existingItems);    existingItems.forEach(item => {
         cart[item.id] = { name: item.name, price: item.price, qty: item.qty };
     });
     renderCart();
