@@ -117,7 +117,7 @@
         .table td { vertical-align: middle; font-size: .875rem; }
 
         /* Mobile */
-        @media(max-width: 768px) {
+        @@media(max-width: 768px) {
             #sidebar { transform: translateX(-100%); }
             #sidebar.show { transform: translateX(0); }
             #topbar { left: 0; }
@@ -299,7 +299,7 @@
     @endif
 </script>
 <style>
-@keyframes slideIn {
+@@keyframes slideIn {
     from { transform: translateX(100%); opacity: 0; }
     to   { transform: translateX(0);    opacity: 1; }
 }
