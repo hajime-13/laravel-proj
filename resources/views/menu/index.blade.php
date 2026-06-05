@@ -33,7 +33,7 @@
                     <tr>
                         <td class="ps-4">
                             @if($item->image)
-                                <img src="{{ Storage::url($item->image) }}"
+                                <img src="{{ \App\Helpers\ImageHelper::url($item->image) }}"
                                      alt="{{ $item->name }}"
                                      style="width:52px;height:52px;object-fit:cover;border-radius:.5rem;border:1px solid #e2e8f0">
                             @else

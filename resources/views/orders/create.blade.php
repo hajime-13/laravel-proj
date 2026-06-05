@@ -62,7 +62,7 @@
                         <div class="menu-card p-2 position-relative" data-id="{{ $item->id }}" data-name="{{ $item->name }}" data-price="{{ $item->price }}" onclick="toggleItem(this)">
                             <div class="qty-badge d-none" id="badge-{{ $item->id }}">1</div>
                             @if($item->image)
-                                <img src="{{ Storage::url($item->image) }}" alt="{{ $item->name }}"
+                                <img src="{{ \App\Helpers\ImageHelper::url($item->image) }}" alt="{{ $item->name }}"
                                      style="width:100%;height:70px;object-fit:cover;border-radius:.4rem;margin-bottom:.4rem">
                             @else
                                 <div style="width:100%;height:70px;background:#f1f5f9;border-radius:.4rem;margin-bottom:.4rem;display:flex;align-items:center;justify-content:center">

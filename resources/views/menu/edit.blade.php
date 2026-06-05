@@ -51,7 +51,7 @@
                         <div class="d-flex align-items-center gap-3 mb-2">
                             @if($menu->image)
                                 <img id="editImagePreview"
-                                     src="{{ Storage::url($menu->image) }}"
+                                     src="{{ \App\Helpers\ImageHelper::url($menu->image) }}"
                                      alt="{{ $menu->name }}"
                                      style="width:80px;height:80px;object-fit:cover;border-radius:.5rem;border:2px solid #4f46e5">
                             @else

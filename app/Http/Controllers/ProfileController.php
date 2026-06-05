@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -30,23 +29,23 @@ class ProfileController extends Controller
             'email'   => 'required|email|unique:users,email,' . $user->id,
             'address' => 'nullable|string|max:500',
             'gender'  => 'nullable|in:Male,Female,Other',
-            'avatar'  => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'avatar'  => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
         ]);
 
         $data = $request->only('name', 'email', 'address', 'gender');
 
         if ($request->hasFile('avatar')) {
-            // Delete old avatar if exists
-            if ($user->avatar) {
-                Storage::disk('public')->delete($user->avatar);
-            }
-            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            // Upload to Cloudinary — returns a permanent URL
+            $uploaded = cloudinary()->upload($request->file('avatar')->getRealPath(), [
+                'folder' => 'fileats/avatars',
+            ]);
+            $data['avatar'] = $uploaded->getSecurePath();
         }
 
         if ($request->filled('password')) {
             $request->validate([
-                'password'              => 'min:8|confirmed',
-                'current_password'      => 'required',
+                'password'         => 'min:8|confirmed',
+                'current_password' => 'required',
             ]);
             if (!Hash::check($request->current_password, $user->password)) {
                 return back()->withErrors(['current_password' => 'Current password is incorrect.']);

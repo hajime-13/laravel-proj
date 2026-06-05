@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class MenuItemController extends Controller
 {
@@ -36,7 +35,10 @@ class MenuItemController extends Controller
         ];
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('menu', 'public');
+            $uploaded = cloudinary()->upload($request->file('image')->getRealPath(), [
+                'folder' => 'fileats/menu',
+            ]);
+            $data['image'] = $uploaded->getSecurePath();
         }
 
         MenuItem::create($data);
@@ -72,16 +74,13 @@ class MenuItemController extends Controller
         ];
 
         if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($menu->image) {
-                Storage::disk('public')->delete($menu->image);
-            }
-            $data['image'] = $request->file('image')->store('menu', 'public');
+            $uploaded = cloudinary()->upload($request->file('image')->getRealPath(), [
+                'folder' => 'fileats/menu',
+            ]);
+            $data['image'] = $uploaded->getSecurePath();
         }
 
-        // Remove image if checkbox checked
-        if ($request->has('remove_image') && $menu->image) {
-            Storage::disk('public')->delete($menu->image);
+        if ($request->has('remove_image')) {
             $data['image'] = null;
         }
 
@@ -94,12 +93,6 @@ class MenuItemController extends Controller
     public function destroy(MenuItem $menu)
     {
         $this->authorizeMenuItem($menu);
-
-        // Delete image file if exists
-        if ($menu->image) {
-            Storage::disk('public')->delete($menu->image);
-        }
-
         $name = $menu->name;
         $menu->delete();
 

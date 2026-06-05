@@ -24,7 +24,7 @@
                 <div class="card-header py-3 px-4 fw-semibold"><i class="bi bi-image me-2"></i>Profile Picture</div>
                 <div class="card-body px-4 pb-4 d-flex align-items-center gap-4">
                     @if($user->avatar)
-                        <img src="{{ Storage::url($user->avatar) }}" class="rounded-circle" width="80" height="80" style="object-fit:cover;border:3px solid #e2e8f0" id="avatarPreview">
+                        <img src="{{ \App\Helpers\ImageHelper::url($user->avatar) }}" class="rounded-circle" width="80" height="80" style="object-fit:cover;border:3px solid #e2e8f0" id="avatarPreview">
                     @else
                         <div class="avatar-circle" style="width:80px;height:80px;font-size:1.75rem" id="avatarPlaceholder">
                             {{ strtoupper(substr($user->name,0,1)) }}
