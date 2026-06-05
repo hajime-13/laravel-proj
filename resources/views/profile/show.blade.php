@@ -14,7 +14,7 @@
             <div class="card-body p-4">
                 <div class="d-flex align-items-center gap-4 mb-4 pb-4" style="border-bottom:1px solid #f1f5f9">
                     @if($user->avatar)
-                        <img src="{{ \App\Helpers\ImageHelper::url($user->avatar) }}" class="rounded-circle" width="90" height="90" style="object-fit:cover;border:3px solid #e2e8f0">
+                        <img src="{{ Storage::url($user->avatar) }}" class="rounded-circle" width="90" height="90" style="object-fit:cover;border:3px solid #e2e8f0">
                     @else
                         <div class="avatar-circle avatar-lg">{{ strtoupper(substr($user->name,0,1)) }}</div>
                     @endif
