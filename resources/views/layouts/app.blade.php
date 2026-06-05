@@ -210,7 +210,7 @@
         <div class="dropdown">
             <button class="btn btn-sm btn-light dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown">
                 @if(Auth::user()->avatar)
-                    <img src="{{ \App\Helpers\ImageHelper::url(Auth::user()->avatar) }}" class="rounded-circle" width="30" height="30" style="object-fit:cover">
+                    <img src="{{ Storage::url(Auth::user()->avatar) }}" class="rounded-circle" width="30" height="30" style="object-fit:cover">
                 @else
                     <div class="avatar-circle" style="width:30px;height:30px;font-size:.75rem;">
                         {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
