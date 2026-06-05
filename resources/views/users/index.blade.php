@@ -33,7 +33,7 @@
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 @if($user->avatar)
-                                    <img src="{{ \App\Helpers\ImageHelper::url($user->avatar) }}" class="rounded-circle" width="34" height="34" style="object-fit:cover">
+                                    <img src="{{ Storage::url($user->avatar) }}" class="rounded-circle" width="34" height="34" style="object-fit:cover">
                                 @else
                                     <div class="avatar-circle">{{ strtoupper(substr($user->name,0,1)) }}</div>
                                 @endif
