@@ -17,7 +17,7 @@
                         <ul class="mb-0 ps-3">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
                     </div>
                 @endif
-                <form method="POST" action="{{ route('menu.update', $menu) }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('menu.update', $menu) }}">
                     @csrf @method('PUT')
 
                     <div class="mb-3">
@@ -45,41 +45,6 @@
                         <textarea name="description" class="form-control" rows="3">{{ old('description', $menu->description) }}</textarea>
                     </div>
 
-                    <!-- Image Section -->
-                    <div class="mb-3">
-                        <label class="form-label small fw-medium">Item Photo</label>
-                        <div class="d-flex align-items-center gap-3 mb-2">
-                            @if($menu->image)
-                                <img id="editImagePreview"
-                                     src="{{ \App\Helpers\ImageHelper::url($menu->image) }}"
-                                     alt="{{ $menu->name }}"
-                                     style="width:80px;height:80px;object-fit:cover;border-radius:.5rem;border:2px solid #4f46e5">
-                            @else
-                                <div id="editImagePlaceholder"
-                                     style="width:80px;height:80px;background:#f1f5f9;border-radius:.5rem;border:2px dashed #cbd5e1;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                    <i class="bi bi-image text-muted fs-3"></i>
-                                </div>
-                                <img id="editImagePreview"
-                                     style="width:80px;height:80px;object-fit:cover;border-radius:.5rem;border:2px solid #4f46e5;display:none">
-                            @endif
-                            <div>
-                                <label class="btn btn-outline-primary btn-sm mb-1">
-                                    <i class="bi bi-upload me-1"></i> {{ $menu->image ? 'Change Photo' : 'Upload Photo' }}
-                                    <input type="file" name="image" id="editImageInput" class="d-none" accept="image/*">
-                                </label>
-                                <p class="text-muted small mb-0">JPG, PNG, GIF, WebP — max 2MB</p>
-                            </div>
-                        </div>
-                        @if($menu->image)
-                        <div class="form-check">
-                            <input type="checkbox" name="remove_image" class="form-check-input" id="removeImage">
-                            <label class="form-check-label small text-danger" for="removeImage">
-                                <i class="bi bi-trash me-1"></i>Remove current photo
-                            </label>
-                        </div>
-                        @endif
-                    </div>
-
                     <div class="mb-4">
                         <div class="form-check form-switch">
                             <input type="checkbox" name="available" class="form-check-input" id="availableEdit" {{ old('available', $menu->available) ? 'checked' : '' }}>
@@ -97,21 +62,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    document.getElementById('editImageInput').addEventListener('change', function () {
-        const file = this.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = e => {
-            const preview = document.getElementById('editImagePreview');
-            const placeholder = document.getElementById('editImagePlaceholder');
-            preview.src = e.target.result;
-            preview.style.display = '';
-            if (placeholder) placeholder.style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-    });
-</script>
-@endpush
