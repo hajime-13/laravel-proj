@@ -104,7 +104,16 @@ class OrderController extends Controller
             ->get()
             ->groupBy('category');
 
-        return view('orders.edit', compact('order', 'menuItems'));
+        $existingItems = $order->orderItems->map(function ($oi) {
+            return [
+                'id'    => $oi->menu_item_id,
+                'name'  => $oi->menuItem->name,
+                'price' => (float) $oi->unit_price,
+                'qty'   => $oi->quantity,
+            ];
+        })->values();
+
+        return view('orders.edit', compact('order', 'menuItems', 'existingItems'));
     }
 
     public function update(Request $request, Order $order)
