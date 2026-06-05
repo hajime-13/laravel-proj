@@ -72,14 +72,12 @@ class MenuItemController extends Controller
         ];
 
         if ($request->hasFile('image')) {
-            // Delete old image if exists
             if ($menu->image) {
                 Storage::disk('public')->delete($menu->image);
             }
             $data['image'] = $request->file('image')->store('menu', 'public');
         }
 
-        // Remove image if checkbox checked
         if ($request->has('remove_image') && $menu->image) {
             Storage::disk('public')->delete($menu->image);
             $data['image'] = null;
@@ -95,7 +93,6 @@ class MenuItemController extends Controller
     {
         $this->authorizeMenuItem($menu);
 
-        // Delete image file if exists
         if ($menu->image) {
             Storage::disk('public')->delete($menu->image);
         }
