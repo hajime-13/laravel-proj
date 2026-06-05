@@ -1,24 +1,11 @@
 @extends('layouts.app')
-@section('title', 'Edit Order #' . $order->id)
-@section('breadcrumb', 'Orders / Edit #' . $order->id)
-
-@push('styles')
-<style>
-    .menu-card { border-radius:.75rem; border:2px solid #e2e8f0; transition:all .15s; cursor:pointer; }
-    .menu-card:hover { border-color:#4f46e5; transform:translateY(-2px); box-shadow:0 4px 12px rgba(79,70,229,.15); }
-    .menu-card.selected { border-color:#4f46e5; background:#eef2ff; }
-    .qty-badge { position:absolute; top:-8px; right:-8px; background:#4f46e5; color:#fff;
-                 border-radius:50%; width:22px; height:22px; font-size:.7rem;
-                 display:flex; align-items:center; justify-content:center; font-weight:700; }
-    .order-item-row { background:#f8fafc; border-radius:.5rem; padding:.65rem .75rem; margin-bottom:.35rem; }
-    #order-summary { position:sticky; top:calc(60px + 1.5rem); }
-</style>
-@endpush
+@section('title', 'Edit Profile')
+@section('breadcrumb', 'Profile / Edit')
 
 @section('content')
 <div class="page-header">
-    <h1><i class="bi bi-pencil-square me-2 text-primary"></i>Edit Order #{{ $order->id }}</h1>
-    <p>Modify items or details for this order.</p>
+    <h1><i class="bi bi-person-gear me-2 text-primary"></i>Edit Profile</h1>
+    <p>Update your personal information and password.</p>
 </div>
 
 @if($errors->any())
@@ -27,174 +14,108 @@
     </div>
 @endif
 
-<form method="POST" action="{{ route('orders.update', $order) }}" id="orderForm">
-    @csrf @method('PUT')
-    <div id="hidden-items-container"></div>
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+            @csrf @method('PUT')
 
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="row g-2">
-                @foreach($menuItems as $category => $items)
-                <div class="col-12">
-                    <h6 class="text-muted fw-semibold mb-2 small text-uppercase">
-                        <i class="bi bi-tag-fill me-1"></i>{{ $category }}
-                    </h6>
-                    <div class="row g-2">
-                        @foreach($items as $item)
-                        <div class="col-6 col-md-4 col-xl-3">
-                            <div class="menu-card p-2 position-relative"
-                                data-id="{{ $item->id }}"
-                                data-name="{{ $item->name }}"
-                                data-price="{{ $item->price }}"
-                                onclick="toggleItem(this)">
-                                <div class="qty-badge d-none" id="badge-{{ $item->id }}">1</div>
-                                @if($item->image)
-                                    <img src="{{ Storage::url($item->image) }}" alt="{{ $item->name }}"
-                                         style="width:100%;height:70px;object-fit:cover;border-radius:.4rem;margin-bottom:.4rem">
-                                @else
-                                    <div style="width:100%;height:70px;background:#f1f5f9;border-radius:.4rem;margin-bottom:.4rem;display:flex;align-items:center;justify-content:center">
-                                        <i class="bi bi-image text-muted fs-4"></i>
-                                    </div>
-                                @endif
-                                <div class="fw-medium small">{{ $item->name }}</div>
-                                <div class="text-success small">₱{{ number_format($item->price, 2) }}</div>
-                            </div>
+            <!-- Avatar -->
+            <div class="card mb-3">
+                <div class="card-header py-3 px-4 fw-semibold"><i class="bi bi-image me-2"></i>Profile Picture</div>
+                <div class="card-body px-4 pb-4 d-flex align-items-center gap-4">
+                    @if($user->avatar)
+                        <img src="{{ Storage::url($user->avatar) }}" class="rounded-circle" width="80" height="80" style="object-fit:cover;border:3px solid #e2e8f0" id="avatarPreview">
+                    @else
+                        <div class="avatar-circle" style="width:80px;height:80px;font-size:1.75rem" id="avatarPlaceholder">
+                            {{ strtoupper(substr($user->name,0,1)) }}
                         </div>
-                        @endforeach
+                        <img id="avatarPreview" class="rounded-circle d-none" width="80" height="80" style="object-fit:cover;border:3px solid #e2e8f0">
+                    @endif
+                    <div>
+                        <label class="btn btn-outline-primary btn-sm mb-1">
+                            <i class="bi bi-upload me-1"></i> Upload Photo
+                            <input type="file" name="avatar" id="avatarInput" class="d-none" accept="image/*">
+                        </label>
+                        <p class="text-muted small mb-0">JPG, PNG, GIF up to 2MB</p>
                     </div>
                 </div>
-                @endforeach
             </div>
-        </div>
 
-        <div class="col-lg-4">
-            <div id="order-summary">
-                <div class="card mb-3">
-                    <div class="card-header py-3 px-4 d-flex justify-content-between align-items-center">
-                        <span class="fw-semibold"><i class="bi bi-cart3 me-2"></i>Cart</span>
-                        <span class="badge bg-primary" id="item-count">0 items</span>
-                    </div>
-                    <div class="card-body px-4 pb-3">
-                        <p class="text-muted small text-center py-3" id="empty-cart-msg" style="display:none">
-                            <i class="bi bi-cart-x d-block fs-3 mb-1"></i>Click items to add
-                        </p>
-                        <div id="cart-items"></div>
-                    </div>
-                    <div class="card-footer bg-transparent px-4 py-3">
-                        <div class="d-flex justify-content-between fw-semibold">
-                            <span>Total</span>
-                            <span class="text-success fs-5" id="cart-total">₱0.00</span>
+            <!-- Personal Info -->
+            <div class="card mb-3">
+                <div class="card-header py-3 px-4 fw-semibold"><i class="bi bi-person me-2"></i>Personal Info</div>
+                <div class="card-body px-4 pb-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-medium">Full Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
                         </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header py-3 px-4 fw-semibold">
-                        <i class="bi bi-person-fill me-2"></i>Details
-                    </div>
-                    <div class="card-body px-4 pb-4">
-                        <div class="mb-3">
-                            <label class="form-label small fw-medium">Customer Name</label>
-                            <input type="text" name="customer_name" class="form-control" value="{{ old('customer_name', $order->customer_name) }}" required>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-medium">Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-medium">Table Number</label>
-                            <input type="text" name="table_number" class="form-control" value="{{ old('table_number', $order->table_number) }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-medium">Status</label>
-                            <select name="status" class="form-select">
-                                @foreach(['pending','preparing','served','cancelled'] as $status)
-                                <option value="{{ $status }}" {{ old('status', $order->status) === $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-medium">Gender</label>
+                            <select name="gender" class="form-select">
+                                <option value="">Prefer not to say</option>
+                                @foreach(['Male','Female','Other'] as $g)
+                                    <option value="{{ $g }}" {{ old('gender', $user->gender) === $g ? 'selected' : '' }}>{{ $g }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="mb-4">
-                            <label class="form-label small fw-medium">Notes</label>
-                            <textarea name="notes" class="form-control" rows="2">{{ old('notes', $order->notes) }}</textarea>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-medium">Address</label>
+                            <input type="text" name="address" class="form-control" value="{{ old('address', $user->address) }}" placeholder="Optional">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 fw-semibold" id="placeOrderBtn" disabled>
-                            <i class="bi bi-check-lg me-1"></i> Save Changes
-                        </button>
-                        <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Change Password -->
+            <div class="card mb-4">
+                <div class="card-header py-3 px-4 fw-semibold"><i class="bi bi-key me-2"></i>Change Password <span class="text-muted fw-normal small">(optional)</span></div>
+                <div class="card-body px-4 pb-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-medium">Current Password</label>
+                            <input type="password" name="current_password" class="form-control @error('current_password') is-invalid @enderror" placeholder="Required to change password">
+                            @error('current_password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-medium">New Password</label>
+                            <input type="password" name="password" class="form-control" placeholder="Min. 8 characters">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-medium">Confirm New Password</label>
+                            <input type="password" name="password_confirmation" class="form-control" placeholder="Repeat new password">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Save Changes</button>
+                <a href="{{ route('profile.show') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
     </div>
-</form>
+</div>
 @endsection
 
 @push('scripts')
 <script>
-    const cart = {};
-
-    // Pre-populate cart from existing order items
-    const existingItems = @json($existingItems);
-    existingItems.forEach(item => {
-        cart[item.id] = { name: item.name, price: item.price, qty: item.qty };
+    document.getElementById('avatarInput')?.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            const preview = document.getElementById('avatarPreview');
+            const placeholder = document.getElementById('avatarPlaceholder');
+            preview.src = e.target.result;
+            preview.classList.remove('d-none');
+            placeholder?.classList.add('d-none');
+        };
+        reader.readAsDataURL(file);
     });
-    renderCart();
-
-    function toggleItem(card) {
-        const id    = card.dataset.id;
-        const name  = card.dataset.name;
-        const price = parseFloat(card.dataset.price);
-        if (cart[id]) {
-            cart[id].qty += 1;
-        } else {
-            cart[id] = { name, price, qty: 1 };
-            card.classList.add('selected');
-        }
-        renderCart();
-    }
-
-    function changeQty(id, delta) {
-        if (!cart[id]) return;
-        cart[id].qty += delta;
-        if (cart[id].qty <= 0) {
-            delete cart[id];
-            document.querySelector(`.menu-card[data-id="${id}"]`)?.classList.remove('selected');
-        }
-        renderCart();
-    }
-
-    function renderCart() {
-        const keys       = Object.keys(cart);
-        document.getElementById('empty-cart-msg').style.display = keys.length ? 'none' : '';
-        document.getElementById('placeOrderBtn').disabled        = keys.length === 0;
-
-        document.querySelectorAll('.qty-badge').forEach(b => b.classList.add('d-none'));
-        document.querySelectorAll('.menu-card').forEach(c => c.classList.remove('selected'));
-        keys.forEach(id => {
-            const badge = document.getElementById('badge-' + id);
-            if (badge) { badge.textContent = cart[id].qty; badge.classList.remove('d-none'); }
-            document.querySelector(`.menu-card[data-id="${id}"]`)?.classList.add('selected');
-        });
-
-        document.getElementById('cart-items').innerHTML = keys.map(id => `
-            <div class="order-item-row d-flex align-items-center gap-2">
-                <div class="flex-grow-1">
-                    <div class="small fw-medium">${cart[id].name}</div>
-                    <div class="text-success small">₱${(cart[id].price * cart[id].qty).toFixed(2)}</div>
-                </div>
-                <div class="d-flex align-items-center gap-1">
-                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="changeQty('${id}', -1)"><i class="bi bi-dash"></i></button>
-                    <span class="fw-semibold small" style="min-width:1.2rem;text-align:center">${cart[id].qty}</span>
-                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-1" onclick="changeQty('${id}', 1)"><i class="bi bi-plus"></i></button>
-                </div>
-            </div>
-        `).join('');
-
-        const total      = keys.reduce((s, id) => s + cart[id].price * cart[id].qty, 0);
-        const totalItems = keys.reduce((s, id) => s + cart[id].qty, 0);
-        document.getElementById('cart-total').textContent = '₱' + total.toFixed(2);
-        document.getElementById('item-count').textContent = totalItems + ' item' + (totalItems !== 1 ? 's' : '');
-
-        document.getElementById('hidden-items-container').innerHTML = keys.map((id, i) => `
-            <input type="hidden" name="items[${i}][id]"  value="${id}">
-            <input type="hidden" name="items[${i}][qty]" value="${cart[id].qty}">
-        `).join('');
-    }
 </script>
 @endpush
