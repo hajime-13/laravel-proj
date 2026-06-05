@@ -92,7 +92,22 @@ class OrderController extends Controller
         return view('orders.show', compact('order'));
     }
 
-    public function edit(Order $order)
+   public function edit(Order $order)
+{
+    $menuItems = MenuItem::where('user_id', auth()->id())
+        ->where('available', 1)
+        ->orderBy('category')->orderBy('name')
+        ->get()->groupBy('category');
+
+    $existingItems = $order->orderItems->map(fn($oi) => [
+        'id'    => $oi->menu_item_id,
+        'name'  => $oi->menuItem->name,
+        'price' => (float) $oi->unit_price,
+        'qty'   => $oi->quantity,
+    ]);
+
+    return view('orders.edit', compact('order', 'menuItems', 'existingItems'));
+} public function edit(Order $order)
     {
         $this->authorizeOrder($order);
         $order->load('orderItems.menuItem');
